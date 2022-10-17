@@ -40,7 +40,21 @@ def get_request(url, **kwargs):
 
 # Create a `post_request` to make HTTP POST requests
 # e.g., response = requests.post(url, params=kwargs, json=payload)
-
+def post_request(url, **kwargs):
+    print(kwargs)
+    print("POST to {} ".format(url))
+    try:
+        payload=kwargs.pop("payload")
+        # Call post method of requests library with URL and parameters
+        response = requests.post(url, headers={'Content-Type': 'application/json'},
+                                            params=kwargs, json=payload)
+    except:
+        # If any error occurs
+        print("Network exception occurred")
+    status_code = response.status_code
+    print("With status {} ".format(status_code))
+    json_data = json.loads(response.text)
+    return json_data
 
 # Create a get_dealers_from_cf method to get dealers from a cloud function
 # def get_dealers_from_cf(url, **kwargs):
@@ -72,7 +86,10 @@ def get_dealers_from_cf(url, **kwargs):
 # - Parse JSON results into a DealerView object list
 def get_dealer_reviews_from_cf(url, **kwargs):
     results = []
-    json_result = get_request(url, dealerId=kwargs.get("dealer_id"))
+    payload = "{\"dealerId\": "
+    payload += str(kwargs.get("dealer_id"))
+    payload += "}"
+    json_result = post_request(url, payload=payload)
     if json_result:
         print(json_result)
         reviews = json_result["dbs"]["docs"]
@@ -98,7 +115,7 @@ def get_dealer_reviews_from_cf(url, **kwargs):
 # - Call get_request() with specified arguments
 # - Get the returned sentiment label such as Positive or Negative
 def analyze_review_sentiments(text):
-    url = "https://api.eu-de.natural-language-understanding.watson.cloud.ibm.com/instances/560f1e28-c91f-4a8f-8cf7-dd73b92697f2"
+    url = "https://api.eu-de.natural-language-understanding.watson.cloud.ibm.com/instances/560f1e28-c91f-4a8f-8cf7-dd73b92697f2/v1/analyze?version=2022-10-17"
     api_key = "JCSMV5K-rzAcpTRysERBzrz-SZT6gHOkHZNHrWMC-GEN"
     params = {
         "text": text,
@@ -108,7 +125,7 @@ def analyze_review_sentiments(text):
         },
         "language": "en"
     }
-    response = requests.get(url, params=params, headers={'Content-Type': 'application/json'},
+    response = requests.post(url, params=params, headers={'Content-Type': 'application/json'},
                                         auth=HTTPBasicAuth('apikey', api_key))
     print(response.text)
     return response.json()["sentiment"]["document"]["label"]
