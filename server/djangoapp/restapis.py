@@ -9,26 +9,19 @@ from requests.auth import HTTPBasicAuth
 # e.g., response = requests.get(url, params=params, headers={'Content-Type': 'application/json'},
 #                                     auth=HTTPBasicAuth('apikey', api_key))
 def get_request(url, **kwargs):
-    print(json.dumps(kwargs))
-    args = json.dumps(kwargs)
+    print(kwargs)
     print("GET from {} ".format(url))
     api_key = kwargs.get("api_key")
-    dealer = kwargs.get("dealerId")
-    pars = "{\"dealerId\": 15}"
-    pars2 = json.loads(pars)
-    print(pars2)
     try:
         # Call get method of requests library with URL and parameters
         if api_key:
             # Basic authentication GET
-            response = requests.get(url, params=args, headers={'Content-Type': 'application/json'},
+            response = requests.get(url, params=kwargs, headers={'Content-Type': 'application/json'},
                                     auth=HTTPBasicAuth('apikey', api_key))
-            print("here")
         else:
             # no authentication GET
             response = requests.get(url, headers={'Content-Type': 'application/json'},
                                     params=kwargs)
-            print("here2")
             print(response.text)
     except:
         # If any error occurs
@@ -86,13 +79,11 @@ def get_dealers_from_cf(url, **kwargs):
 # - Parse JSON results into a DealerView object list
 def get_dealer_reviews_from_cf(url, **kwargs):
     results = []
-    payload = "{\"dealerId\": "
-    payload += str(kwargs.get("dealer_id"))
-    payload += "}"
-    json_result = post_request(url, payload=payload)
+    json_result = get_request(url)
     if json_result:
         print(json_result)
-        reviews = json_result["dbs"]["docs"]
+        reviews_all = json_result["dbs"]["docs"]
+        reviews = [r for r in reviews_all if r['dealership'] == kwargs["dealer_id"]]
         for review_doc in reviews:
             review_obj = DealerReview(
                 dealership=review_doc.get("dealership"),

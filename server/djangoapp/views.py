@@ -98,15 +98,18 @@ def get_dealer_details(request, dealer_id):
 # ...
 def add_review(request, dealer_id):
     if request.method == "POST":
-        url = "https://eu-de.functions.appdomain.cloud/api/v1/web/ibm-course-137_ibm-course-137/dealership-package/post-review"
-        review = {}
-        review['name'] = request.POST['username']
-        review['dealership'] = dealer_id
-        review['review'] = request.POST['review']
-        review['purchase'] = request.POST['purchase']
-        review['purchase_date'] = request.POST['purchase_date']
-
-        json_payload["review"] = review
-        response = post_request(url, json_payload, dealerId=dealer_id)
+        if request.user.is_authenticated:
+            url = "https://eu-de.functions.appdomain.cloud/api/v1/web/ibm-course-137_ibm-course-137/dealership-package/post-review"
+            review = {}
+            review['name'] = request.POST['username']
+            review['dealership'] = dealer_id
+            review['review'] = request.POST['review']
+            review['purchase'] = request.POST['purchase']
+            review['purchase_date'] = request.POST['purchase_date']
+            payload['car_make'] = request.POST['car_make']
+            payload['car_model'] = request.POST['car_model']
+            payload['car_year'] = request.POST['car_year']
+            json_payload["review"] = review
+            response = post_request(url, json_payload, dealerId=dealer_id)
     return HttpResponse(response.text)
 
