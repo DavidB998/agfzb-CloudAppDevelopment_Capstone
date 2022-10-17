@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 # from .models import related models
-# from .restapis import related methods
+from .restapis import get_dealers_from_cf, get_dealer_reviews_from_cf
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from datetime import datetime
@@ -83,15 +83,15 @@ def get_dealerships(request):
 def get_dealer_details(request, dealer_id):
     context = {}
     if request.method == "GET":
-        url = "https://eu-de.functions.appdomain.cloud/api/v1/web/ibm-course-137_ibm-course-137/dealership-package/get-review"
+        url = "https://eu-de.functions.appdomain.cloud/api/v1/web/ibm-course-137_ibm-course-137/dealership-package/get-review.json"
         reviews = get_dealer_reviews_from_cf(url, dealer_id=dealer_id)
-
+        print(reviews)
         review_names = ' '.join([review.name for review in reviews])
 
         context['reviews'] = review_names
-        context['dealer_id'] = dealer_id
-        context['dealer'] = get_dealer_detail_infos(dealer_id)
-    return render(request, 'djangoapp/dealer_details.html', context)
+        #context['dealer_id'] = dealer_id
+        #context['dealer'] = get_dealer_detail_infos(dealer_id)
+    return HttpResponse(review_names)
 
 # Create a `add_review` view to submit a review
 # def add_review(request, dealer_id):

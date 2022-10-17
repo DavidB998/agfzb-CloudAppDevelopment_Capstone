@@ -1,7 +1,7 @@
 import requests
 import json
 # import related models here
-from .models import CarDealer
+from .models import CarDealer, DealerReview
 from requests.auth import HTTPBasicAuth
 
 
@@ -9,19 +9,27 @@ from requests.auth import HTTPBasicAuth
 # e.g., response = requests.get(url, params=params, headers={'Content-Type': 'application/json'},
 #                                     auth=HTTPBasicAuth('apikey', api_key))
 def get_request(url, **kwargs):
-    print(kwargs)
+    print(json.dumps(kwargs))
+    args = json.dumps(kwargs)
     print("GET from {} ".format(url))
     api_key = kwargs.get("api_key")
+    dealer = kwargs.get("dealerId")
+    pars = "{\"dealerId\": 15}"
+    pars2 = json.loads(pars)
+    print(pars2)
     try:
         # Call get method of requests library with URL and parameters
         if api_key:
             # Basic authentication GET
-            response = requests.get(url, params=params, headers={'Content-Type': 'application/json'},
+            response = requests.get(url, params=args, headers={'Content-Type': 'application/json'},
                                     auth=HTTPBasicAuth('apikey', api_key))
+            print("here")
         else:
             # no authentication GET
             response = requests.get(url, headers={'Content-Type': 'application/json'},
-                            params=kwargs)
+                                    params=kwargs)
+            print("here2")
+            print(response.text)
     except:
         # If any error occurs
         print("Network exception occurred")
@@ -44,7 +52,7 @@ def get_dealers_from_cf(url, **kwargs):
     json_result = get_request(url)
     if json_result:
         # Get the row list in JSON as dealers
-        dealers = json_result["dealerships"][docs]
+        dealers = json_result["dealerships"]["docs"]
         # For each dealer object
         for dealer in dealers:
             # Get its content in `doc` object
@@ -64,10 +72,10 @@ def get_dealers_from_cf(url, **kwargs):
 # - Parse JSON results into a DealerView object list
 def get_dealer_reviews_from_cf(url, **kwargs):
     results = []
-    json_result = get_request(url, dealer_id=kwargs.get("dealer_id"))
+    json_result = get_request(url, dealerId=kwargs.get("dealer_id"))
     if json_result:
         print(json_result)
-        reviews = json_result["entries"]
+        reviews = json_result["dbs"]["docs"]
         for review_doc in reviews:
             review_obj = DealerReview(
                 dealership=review_doc.get("dealership"),
@@ -89,17 +97,20 @@ def get_dealer_reviews_from_cf(url, **kwargs):
 # def analyze_review_sentiments(text):
 # - Call get_request() with specified arguments
 # - Get the returned sentiment label such as Positive or Negative
-def analyze_review_sentiments(**kwargs):
-    url = 
-    api_key = 
-    params = dict()
-    params["text"] = kwargs["text"]
-    params["version"] = kwargs["version"]
-    params["features"] = kwargs["features"]
-    params["return_analyzed_text"] = kwargs["return_analyzed_text"]
+def analyze_review_sentiments(text):
+    url = "https://api.eu-de.natural-language-understanding.watson.cloud.ibm.com/instances/560f1e28-c91f-4a8f-8cf7-dd73b92697f2"
+    api_key = "JCSMV5K-rzAcpTRysERBzrz-SZT6gHOkHZNHrWMC-GEN"
+    params = {
+        "text": text,
+        "features": {
+            "sentiment": {
+            }
+        },
+        "language": "en"
+    }
     response = requests.get(url, params=params, headers={'Content-Type': 'application/json'},
                                         auth=HTTPBasicAuth('apikey', api_key))
-    print(response)
+    print(response.text)
     return response.json()["sentiment"]["document"]["label"]
 
 
