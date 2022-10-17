@@ -22,7 +22,6 @@ def get_request(url, **kwargs):
             # no authentication GET
             response = requests.get(url, headers={'Content-Type': 'application/json'},
                                     params=kwargs)
-            print(response.text)
     except:
         # If any error occurs
         print("Network exception occurred")
@@ -81,10 +80,10 @@ def get_dealer_reviews_from_cf(url, **kwargs):
     results = []
     json_result = get_request(url)
     if json_result:
-        print(json_result)
         reviews_all = json_result["dbs"]["docs"]
         reviews = [r for r in reviews_all if r['dealership'] == kwargs["dealer_id"]]
         for review_doc in reviews:
+            print(review_doc)
             review_obj = DealerReview(
                 dealership=review_doc.get("dealership"),
                 name=review_doc.get("name"),
