@@ -36,7 +36,7 @@ def post_request(url, **kwargs):
     print(kwargs)
     print("POST to {} ".format(url))
     try:
-        payload=kwargs.pop("payload")
+        payload = kwargs.pop('payload')
         # Call post method of requests library with URL and parameters
         response = requests.post(url, headers={'Content-Type': 'application/json'},
                                             params=kwargs, json=payload)
