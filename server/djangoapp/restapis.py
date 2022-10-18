@@ -79,7 +79,7 @@ def get_dealers_from_cf(url, **kwargs):
 def get_dealer_reviews_from_cf(url, **kwargs):
     results = []
     json_result = get_request(url)
-    if json_result:
+    if json_result["dbs"]:
         reviews_all = json_result["dbs"]["docs"]
         reviews = [r for r in reviews_all if r['dealership'] == kwargs["dealer_id"]]
         for review_doc in reviews:
